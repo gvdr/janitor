@@ -5,13 +5,14 @@
 #'
 #' @param dat the input data.frame or matrix.
 #' @param which one of "rows", "cols", or \code{c("rows", "cols")}.  Where no value of which is provided, defaults to removing both empty rows and empty columns, declaring the behavior with a printed message.
+#' @param drop_empty_string either TRUE or FALSE. If TRUE columns that are composed of only empty strings, '', are removed.
 #' @return Returns the object without its missing rows or columns.
 #' @export
 #' @examples
 #' # not run:
 #' # dat %>% remove_empty("rows")
 
-remove_empty <- function(dat, which = c("rows", "cols")) {
+remove_empty <- function(dat, which = c("rows", "cols"), drop_empty_string = FALSE) {
   if (missing(which) && !missing(dat)) {
     message("value for \"which\" not specified, defaulting to c(\"rows\", \"cols\")")
     which <- c("rows", "cols")
@@ -21,9 +22,11 @@ remove_empty <- function(dat, which = c("rows", "cols")) {
   }
   if ("rows" %in% which) {
     dat <- dat[rowSums(is.na(dat)) != ncol(dat), , drop = FALSE]
+    if(drop_empty_string) dat <- dat[rowSums(dat == '') != ncol(dat), ]
   }
   if ("cols" %in% which) {
     dat <- dat[,colSums(!is.na(dat)) > 0, drop = FALSE]
+    if(drop_empty_string) dat <- dat[colSums(dat != '') > 0]
   }
   dat
 }
